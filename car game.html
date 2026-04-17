@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Racing Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            border: 3px solid #333;
+            background: linear-gradient(to bottom, #228B22 0%, #90EE90 30%, #808080 30%, #808080 70%, #90EE90 70%, #228B22 100%);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .controls {
+            margin-top: 10px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="score" id="score">Score: 0</div>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div class="controls">
+        Use ARROW KEYS or A/D to steer | SPACE to boost | R to restart
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        // Game state
+        let gameRunning = true;
+        let score = 0;
+        let gameSpeed = 3;
+
+        // Player car
+        const player = {
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 100,
+            width: 50,
+            height: 80,
+            speed: 0,
+            maxSpeed: 8,
+            acceleration: 0.3,
+            friction: 0.1,
+            boost: false
+        };
+
+        // Road lines
+        const roadLines = [];
+        const roadWidth = 300;
+
+        // Obstacles (enemy cars)
+        const obstacles = [];
+
+        // Input handling
+        const keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === ' ') {
+                e.preventDefault();
+                player.boost = true;
+            }
+            if (e.key.toLowerCase() === 'r') {
+                resetGame();
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+            if (e.key.toLowerCase() === ' ') {
+                player.boost = false;
+            }
+        });
+
+        // Initialize road lines
+        function initRoadLines() {
+            roadLines.length = 0;
+            for (let i = 0; i < 20; i++) {
+                roadLines.push({
+                    x: canvas.width / 2 - 5,
+                    y: i * 40,
+                    width: 10,
+                    height: 30
+                });
+            }
+        }
+
+        // Create obstacle
+        function createObstacle() {
+            const lanes = [50, 150, 250]; // Three lanes
